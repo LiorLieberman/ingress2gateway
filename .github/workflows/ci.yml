@@ -1,8 +1,8 @@
 name: Kubernetes-sigs/ingress2gateway CI
 on:
   push:
-    branches:
-      - '*'
+    # branches:
+    #   - '*'
     tags:
       - 'v*.*.*'
   pull_request:
