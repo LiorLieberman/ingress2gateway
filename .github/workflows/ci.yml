@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: test tags
-      if: contains(github.ref, 'tags')
+      # if: contains(github.ref, 'tags')
       run: |
         echo 'Lior'
         echo ${{ github.ref }}
