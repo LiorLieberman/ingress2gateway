@@ -1,106 +1,122 @@
-# Ingress to Gateway
+<p align="center">
+  <img alt="GoReleaser Logo" src="https://avatars2.githubusercontent.com/u/24697112?v=3&s=200" height="140" />
+  <h3 align="center">GoReleaser</h3>
+  <p align="center">Deliver Go binaries as fast and easily as possible.</p>
+</p>
 
-This project helps translate Ingress resources to Gateway API resources,
-specifically HTTPRoutes. This project is managed by the [Gateway
-API](https://gateway-api.sigs.k8s.io/) SIG-Network subproject.
+---
 
-## Status
+GoReleaser builds Go binaries for several platforms, creates a GitHub release and then
+pushes a Homebrew formula to a tap repository. All that wrapped in your favorite CI.
 
-This project is early in the development phase and is still experimental in
-nature. Both bugs and breaking changes are likely.
+![](https://raw.githubusercontent.com/goreleaser/example-simple/main/goreleaser.gif)
 
-## Scope
+---
 
-This project is primarily focused on translating Ingress resources to Gateway
-API resources. Some widely used annotations and/or CRDs _may_ be supported, as
-long as they can be translated to Gateway API directly. This project is not
-intended to copy annotations from Ingress to Gateway API.
+## Get GoReleaser
 
-## Build from Source
+- [On your machine](https://goreleaser.com/install/);
+- [On CI/CD systems](https://goreleaser.com/ci/).
 
-1. Ensure that your system meets the following requirements:
-- Install Git: Make sure Git is installed on your system to clone the project repository.
-- Install Go: Make sure the go language is installed on your system. You can download it from the official website (https://golang.org/dl/) and follow the installation instructions.
+## Documentation
 
-2. Clone the project repository
-```shell
-git clone https://github.com/kubernetes-sigs/ingress2gateway.git && cd ingress2gateway
-```
+Documentation is hosted live at https://goreleaser.com
 
-3. Build the project
-```shell
-make build
-```
+## Community
 
-## Usage
+You have questions, need support and or just want to talk about GoReleaser?
 
-This project reads Ingress resources from a Kubernetes cluster based on your
-current Kube Config. It will output YAML for equivalent Gateway API resources
-to stdout. Until this project is released, the best way to use this is to run
-the following within the repo:
+Here are ways to get in touch with the GoReleaser community:
 
-```
-go run . print
-```
+[![Join Discord](https://img.shields.io/badge/Join_our_Discord_server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/RGEBtg8vQ6)
+[![Follow Twitter](https://img.shields.io/badge/follow_on_twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/goreleaser)
+[![GitHub Discussions](https://img.shields.io/badge/GITHUB_DISCUSSION-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/goreleaser/goreleaser/discussions)
 
-## Conversion of Ingress resources to Gateway API
+You can find the links above and all others [here](https://goreleaser.com/links/).
 
-### Processing Order and Conflicts
+### Code of Conduct
 
-Ingress resources will be processed with a defined order to ensure deterministic generated Gateway API configuration.
-This should also determine precedence order of Ingress resources and routes in case of conflicts.
+This project adheres to the Contributor Covenant [code of conduct](https://github.com/goreleaser/.github/blob/main/CODE_OF_CONDUCT.md).
+By participating, you are expected to uphold this code.
+We appreciate your contribution.
+Please refer to our [contributing guidelines](CONTRIBUTING.md) for further information.
 
-Ingress resources with the oldest creation timestamp will be sorted first and therefore given precedence.
-If creation timestamps are equal, then sorting will be done based on the namespace/name of the resources.
-If an Ingress rule conflicts with another (e.g. same path match but different backends) an error will be reported for the one that sorted later.
+## Badges
 
-Since the Ingress v1 spec does not itself have a conflict resolution guide, we have adopted this one.
-These rules are similar to the [Gateway API conflict resolution guidelines](https://gateway-api.sigs.k8s.io/concepts/guidelines/#conflicts).
+[![Release](https://img.shields.io/github/release/goreleaser/goreleaser.svg?style=for-the-badge)](https://github.com/goreleaser/goreleaser/releases/latest)
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=for-the-badge)](/LICENSE.md)
+[![Build status](https://img.shields.io/github/actions/workflow/status/goreleaser/goreleaser/build.yml?style=for-the-badge&branch=main)](https://github.com/goreleaser/goreleaser/actions?workflow=build)
+[![Codecov branch](https://img.shields.io/codecov/c/github/goreleaser/goreleaser/main.svg?style=for-the-badge)](https://codecov.io/gh/goreleaser/goreleaser)
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/goreleaser&style=for-the-badge)](https://artifacthub.io/packages/search?repo=goreleaser)
+[![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=for-the-badge)](http://godoc.org/github.com/goreleaser/goreleaser)
+[![Powered By: GoReleaser](https://img.shields.io/badge/powered%20by-goreleaser-green.svg?style=for-the-badge)](https://github.com/goreleaser)
+[![Backers on Open Collective](https://opencollective.com/goreleaser/backers/badge.svg?style=for-the-badge)](https://opencollective.com/goreleaser/backers/)
+[![Sponsors on Open Collective](https://opencollective.com/goreleaser/sponsors/badge.svg?style=for-the-badge)](https://opencollective.com/goreleaser/sponsors/)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=for-the-badge)](https://conventionalcommits.org)
+[![CII Best Practices](https://img.shields.io/cii/summary/5420?label=openssf%20best%20practices&style=for-the-badge)](https://bestpractices.coreinfrastructure.org/projects/5420)
 
-### Ingress resource fields to Gateway API fields
+## Sponsors
 
-Given a set of Ingress resources, `ingress2gateway` will generate a Gateway with various HTTP and HTTPS Listeners as well as HTTPRoutes that should represent equivalent routing rules.
+Does your company use goreleaser? Help keep the project bug-free and feature rich by [sponsoring the project](https://opencollective.com/goreleaser#sponsor).
 
-| Ingress Field | Gateway API configuration |
-|---------------|---------------------------|
-| `ingressClassName` | If configured on an Ingress resource, this value will be used as the `gatewayClassName` set on the corresponding generated Gateway. |
-| `defaultBackend` | If present, this configuration will generate a Gateway Listener with no `hostname` specified as well as a catchall HTTPRoute that references this listener. The backend specified here will be translated to a HTTPRoute `rules[].backendRefs[]` element. |
-| `tls[].hosts` | Each host in an IngressTLS will result in a HTTPS Listener on the generated Gateway with the following: `listeners[].hostname` = host as described, `listeners[].port` = `443`, `listeners[].protocol` = `HTTPS`, `listeners[].tls.mode` = `Terminate` |
-| `tls[].secretName` | The secret specified here will be referenced in the Gateway HTTPS Listeners mentioned above with the field `listeners[].tls.certificateRefs`. Each Listener for each host in an IngressTLS will get this secret. |
-| `rules[].host` | If non-empty, each distinct value for this field in the provided Ingress resources will result in a separate Gateway HTTP Listener with matching `listeners[].hostname`. `listeners[].port` will be set to `80` and `listeners[].protocol` set to `HTTPS`. In addition, Ingress rules with the same hostname will generate HTTPRoute rules in a HTTPRoute with `hostnames` containing it as the single element. If empty, similar to the `defaultBackend`, a Gateway Listener with no hostname configuration will be generated (if it doesn't exist) and routing rules will be generated in a catchall HTTPRoute. |
-| `rules[].http.paths[].path` | This field translates to a HTTPRoute `rules[].matches[].path.value` configuration. |
-| `rules[].http.paths[].pathType` | This field translates to a HTTPRoute `rules[].matches[].path.type` configuration. Ingress `Exact` = HTTPRoute `Exact` match. Ingress `Prefix` = HTTPRoute `PathPrefix` match. |
-| `rules[].http.paths[].backend` | The backend specified here will be translated to a HTTPRoute `rules[].backendRefs[]` element. |
+<a href="https://opencollective.com/goreleaser/sponsors/0/website" target="_blank"><img src="https://opencollective.com/goreleaser/sponsors/0/avatar"></a>
+<a href="https://opencollective.com/goreleaser/sponsors/1/website" target="_blank"><img src="https://opencollective.com/goreleaser/sponsors/1/avatar"></a>
+<a href="https://opencollective.com/goreleaser/sponsors/2/website" target="_blank"><img src="https://opencollective.com/goreleaser/sponsors/2/avatar"></a>
+<a href="https://opencollective.com/goreleaser/sponsors/3/website" target="_blank"><img src="https://opencollective.com/goreleaser/sponsors/3/avatar"></a>
+<a href="https://opencollective.com/goreleaser/sponsors/4/website" target="_blank"><img src="https://opencollective.com/goreleaser/sponsors/4/avatar"></a>
+<a href="https://opencollective.com/goreleaser/sponsors/5/website" target="_blank"><img src="https://opencollective.com/goreleaser/sponsors/5/avatar"></a>
+<a href="https://opencollective.com/goreleaser/sponsors/6/website" target="_blank"><img src="https://opencollective.com/goreleaser/sponsors/6/avatar"></a>
+<a href="https://opencollective.com/goreleaser/sponsors/7/website" target="_blank"><img src="https://opencollective.com/goreleaser/sponsors/7/avatar"></a>
+<a href="https://opencollective.com/goreleaser/sponsors/8/website" target="_blank"><img src="https://opencollective.com/goreleaser/sponsors/8/avatar"></a>
+<a href="https://opencollective.com/goreleaser/sponsors/9/website" target="_blank"><img src="https://opencollective.com/goreleaser/sponsors/9/avatar"></a>
+<a href="https://opencollective.com/goreleaser/sponsors/10/website" target="_blank"><img src="https://opencollective.com/goreleaser/sponsors/10/avatar"></a>
+<a href="https://opencollective.com/goreleaser/sponsors/11/website" target="_blank"><img src="https://opencollective.com/goreleaser/sponsors/11/avatar"></a>
+<a href="https://opencollective.com/goreleaser/sponsors/12/website" target="_blank"><img src="https://opencollective.com/goreleaser/sponsors/12/avatar"></a>
+<a href="https://opencollective.com/goreleaser/sponsors/13/website" target="_blank"><img src="https://opencollective.com/goreleaser/sponsors/13/avatar"></a>
+<a href="https://opencollective.com/goreleaser/sponsors/14/website" target="_blank"><img src="https://opencollective.com/goreleaser/sponsors/14/avatar"></a>
+<a href="https://opencollective.com/goreleaser/sponsors/15/website" target="_blank"><img src="https://opencollective.com/goreleaser/sponsors/15/avatar"></a>
+<a href="https://opencollective.com/goreleaser/sponsors/16/website" target="_blank"><img src="https://opencollective.com/goreleaser/sponsors/16/avatar"></a>
 
-### Implementation-Specific Annotations
+## Backers
 
-Although most annotations are ignored, this project includes experimental
-support for the following annotations:
+Love our work and community? [Become a backer](https://opencollective.com/goreleaser).
 
-* kubernetes.io/ingress.class: Same behavior as the `ingressClassName` field above, if specified this value will be used as the `gatewayClassName` set on the corresponding generated Gateway.
+<a href="https://opencollective.com/goreleaser/backers/0/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/0/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/1/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/1/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/2/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/2/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/3/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/3/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/4/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/4/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/5/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/5/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/6/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/6/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/7/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/7/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/8/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/8/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/9/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/9/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/10/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/10/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/11/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/11/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/12/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/12/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/13/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/13/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/14/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/14/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/15/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/15/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/16/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/16/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/17/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/17/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/18/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/18/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/19/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/19/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/20/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/20/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/21/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/21/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/22/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/22/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/23/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/23/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/24/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/24/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/25/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/25/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/26/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/26/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/27/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/27/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/28/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/28/avatar"></a>
+<a href="https://opencollective.com/goreleaser/backers/29/website" target="_blank"><img src="https://opencollective.com/goreleaser/backers/29/avatar"></a>
 
-#### ingress-nginx:
+## Contributors
 
-* nginx.ingress.kubernetes.io/canary: If set to `true` will enable weighting backends.
-* nginx.ingress.kubernetes.io/canary-by-header: If specified, the value of this annotation is the header name that will be added as a HTTPHeaderMatch for the routes generated from this Ingress. If not specified, no HTTPHeaderMatch will be generated.
-* nginx.ingress.kubernetes.io/canary-by-header-value: If specified, the value of this annotation is the header value to perform an `HeaderMatchExact` match on in the generated HTTPHeaderMatch.
-* nginx.ingress.kubernetes.io/canary-by-header-pattern: If specified, this is the  pattern to match against for the HTTPHeaderMatch, which will be of type `HeaderMatchRegularExpression`.
-* nginx.ingress.kubernetes.io/canary-weight: If specified and non-zero, this value will be applied as the weight of the backends for the routes generated from this Ingress resource.
-* nginx.ingress.kubernetes.io/canary-weight-total
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+<a href="https://github.com/goreleaser/goreleaser/graphs/contributors"><img src="https://opencollective.com/goreleaser/contributors.svg?width=890" /></a>
 
-If you are reliant on any annotations not listed above, you'll need to manually
-find a Gateway API equivalent.
+## Stargazers over time
 
-## Get Involved
-
-This project will be discussed in the same Slack channel and community meetings
-as the rest of the Gateway API subproject. For more information, refer to the
-[Gateway API Community](https://gateway-api.sigs.k8s.io/contributing/) page.
-
-### Code of conduct
-
-Participation in the Kubernetes community is governed by the [Kubernetes Code of
-Conduct](code-of-conduct.md).
-
-[owners]: https://git.k8s.io/community/contributors/guide/owners.md
-[Creative Commons 4.0]: https://git.k8s.io/website/LICENSE
+[![Stargazers over time](https://starchart.cc/goreleaser/goreleaser.svg)](https://starchart.cc/goreleaser/goreleaser)
